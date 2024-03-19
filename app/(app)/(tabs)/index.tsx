@@ -1,8 +1,8 @@
 import { View, Text, SafeAreaView } from "react-native";
-import React from "react";
-import { useAuth } from "../context/auth-context";
+import { useAuth } from "../../context/auth-context";
 import { Stack } from "expo-router";
-import TrackingCard from "../../components/tracking-card";
+import TrackingCard from "../../../components/tracking-card";
+import OrdersList from "../../../components/order-list";
 
 const Home = () => {
   const { signOut } = useAuth();
@@ -16,6 +16,8 @@ const Home = () => {
         </Text>
         <TrackingCard />
       </View>
+
+      <OrdersList />
 
       <Text onPress={signOut}>Logout</Text>
     </SafeAreaView>
