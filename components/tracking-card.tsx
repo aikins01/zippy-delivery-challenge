@@ -10,7 +10,6 @@ const TrackingCard = () => {
       />
 
       <View>
-        {/* Title */}
         <Text className="mb-1 text-xl font-semibold text-white">
           Track your parcel
         </Text>
