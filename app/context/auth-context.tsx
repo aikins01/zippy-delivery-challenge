@@ -25,7 +25,9 @@ export const AuthProvider = ({ children }: any) => {
 
   useEffect(() => {
     const loadToken = async () => {
-      const token = await SecureStore.getItemAsync(process.env.TOKEN_STORE_KEY);
+      const token = await SecureStore.getItemAsync(
+        process.env.EXPO_PUBLIC_TOKENSTORE_KEY
+      );
       console.log(
         "𝐚𝐢𝐤𝐢𝐧𝐬 ~ file: auth-context.tsx:29 ~ loadToken ~ token:",
         token
@@ -45,7 +47,10 @@ export const AuthProvider = ({ children }: any) => {
 
   const signin = async (email: string, password: string) => {
     try {
-      const result = await axios.post(`${process.env.API_BASEURL}/login`);
+      const result = await axios.post(
+        `${process.env.EXPO_PUBLIC_API_BASEURL}/login`,
+        { email, password }
+      );
 
       console.log(
         "𝐚𝐢𝐤𝐢𝐧𝐬 ~ file: auth-context.tsx:30 ~ signin ~ result:",
@@ -59,16 +64,16 @@ export const AuthProvider = ({ children }: any) => {
       ] = `Bearer ${result.data.accessToken}`;
 
       await SecureStore.setItemAsync(
-        process.env.TOKEN_STORE_KEY,
+        process.env.EXPO_PUBLIC_TOKENSTORE_KEY,
         result.data.accessToken
       );
     } catch (error) {
-      return { error: true, message: error.response.data.responseDesc };
+      return { error: true, message: error.response.data.error };
     }
   };
 
   const signout = async () => {
-    await SecureStore.deleteItemAsync(process.env.TOKEN_STORE_KEY);
+    await SecureStore.deleteItemAsync(process.env.EXPO_PUBLIC_TOKENSTORE_KEY);
 
     axios.defaults.headers.common["Authorization"] = "";
 
