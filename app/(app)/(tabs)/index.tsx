@@ -19,7 +19,7 @@ const Home = () => {
 
       <OrdersList />
 
-      <Text onPress={signOut}>Logout</Text>
+      {/* <Text onPress={signOut}>Logout</Text> */}
     </SafeAreaView>
   );
 };
