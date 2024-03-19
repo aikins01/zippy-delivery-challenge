@@ -2,21 +2,24 @@ import { View, Text, Image, TextInput, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import { useAuth } from "../context/auth-context";
+import { router } from "expo-router";
 
 const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { onSignin } = useAuth();
+  const { signIn } = useAuth();
 
   const signin = async () => {
     setSubmitting(true);
-    const response = await onSignin!(email, password);
+    const response = await signIn!(email, password);
     if (response && response.error) {
       alert(response.message);
       setSubmitting(false);
+      return;
     }
+    router.replace("/");
   };
   return (
     <View className="items-center justify-center flex-1 w-full ">

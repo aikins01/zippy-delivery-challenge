@@ -3,9 +3,15 @@ import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 
 interface AuthProps {
-  authState?: { token: string | null; authenticated: boolean | null };
-  onSignin?: (email: string, password: string) => Promise<any>;
-  onSignout?: () => Promise<any>;
+  authState?: AuthState;
+  signIn?: (email: string, password: string) => Promise<any>;
+  signOut?: () => Promise<any>;
+}
+
+interface AuthState {
+  token: string | null;
+  authenticated: boolean | null;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthProps>({});
@@ -15,12 +21,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: any) => {
-  const [authState, setAuthState] = useState<{
-    token: string | null;
-    authenticated: boolean;
-  }>({
+  const [authState, setAuthState] = useState<AuthState>({
     token: null,
-    authenticated: false,
+    authenticated: null,
+    loading: true,
   });
 
   useEffect(() => {
@@ -28,16 +32,23 @@ export const AuthProvider = ({ children }: any) => {
       const token = await SecureStore.getItemAsync(
         process.env.EXPO_PUBLIC_TOKENSTORE_KEY
       );
-      console.log(
-        "𝐚𝐢𝐤𝐢𝐧𝐬 ~ file: auth-context.tsx:29 ~ loadToken ~ token:",
-        token
-      );
 
       if (token) {
+        console.log(
+          "𝐚𝐢𝐤𝐢𝐧𝐬 ~ file: auth-context.tsx:37 ~ loadToken ~ token:",
+          token
+        );
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         setAuthState({
           token,
           authenticated: true,
+          loading: false,
+        });
+      } else {
+        setAuthState({
+          token: null,
+          authenticated: false,
+          loading: false,
         });
       }
     };
@@ -45,7 +56,7 @@ export const AuthProvider = ({ children }: any) => {
     loadToken();
   }, []);
 
-  const signin = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string) => {
     try {
       const result = await axios.post(
         `${process.env.EXPO_PUBLIC_API_BASEURL}/login`,
@@ -57,7 +68,11 @@ export const AuthProvider = ({ children }: any) => {
         result
       );
 
-      setAuthState({ token: result.data.accessToken, authenticated: true });
+      setAuthState({
+        token: result.data.accessToken,
+        authenticated: true,
+        loading: false,
+      });
 
       axios.defaults.headers.common[
         "Authorization"
@@ -72,7 +87,7 @@ export const AuthProvider = ({ children }: any) => {
     }
   };
 
-  const signout = async () => {
+  const signOut = async () => {
     await SecureStore.deleteItemAsync(process.env.EXPO_PUBLIC_TOKENSTORE_KEY);
 
     axios.defaults.headers.common["Authorization"] = "";
@@ -80,12 +95,14 @@ export const AuthProvider = ({ children }: any) => {
     setAuthState({
       token: null,
       authenticated: false,
+      loading: false,
     });
   };
 
   const value = {
-    onSignin: signin,
-    onSignout: signout,
+    authState,
+    signIn,
+    signOut,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
